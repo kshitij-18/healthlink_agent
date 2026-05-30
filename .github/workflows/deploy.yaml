@@ -106,7 +106,7 @@ jobs:
             --memory 2Gi \
             --cpu 2 \
             --timeout 300 \
-            --port = 8000
+            --port 8000
             --max-instances 10 \
             --min-instances 0 \
             --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }},LOG_LEVEL=INFO"
