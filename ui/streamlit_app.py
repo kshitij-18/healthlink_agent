@@ -2,6 +2,7 @@
 HealthLink Streamlit UI
 User-friendly interface for health assessment system.
 """
+import os
 import streamlit as st
 import requests
 import json
@@ -10,7 +11,7 @@ import plotly.graph_objects as go
 
 
 # Configuration
-API_BASE_URL = "http://localhost:8000/api/v1"
+API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000/api/v1")
 
 # Page config
 st.set_page_config(

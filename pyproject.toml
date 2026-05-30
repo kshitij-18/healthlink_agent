@@ -15,7 +15,6 @@ dependencies = [
     "numpy==1.26.3",
     "pandas==2.1.4",
     "pinecone>=8.1.2",
-    "pinecone-client>=3.0.0",
     "plotly==5.18.0",
     "pydantic>=2.5.3",
     "pydantic-settings==2.1.0",

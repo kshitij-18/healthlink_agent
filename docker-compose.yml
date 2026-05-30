@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  # FastAPI Backend
+  # FastAPI Backend Service
   api:
     build:
       context: .
@@ -9,11 +7,9 @@ services:
     container_name: healthlink-api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      # Required API Keys
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - PINECONE_API_KEY=${PINECONE_API_KEY}
-
       # LLM Configuration (optional overrides)
       - LLM_MODEL_NAME=${LLM_MODEL_NAME:-gemini-2.5-flash}
       - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0.2}
@@ -31,7 +27,7 @@ services:
       - CHUNK_SIZE=${CHUNK_SIZE:-500}
       - CHUNK_OVERLAP=${CHUNK_OVERLAP:-50}
 
-      # Database
+      # Database Configuration
       - DATABASE_URL=sqlite:///./data/healthlink.db
       - DB_ECHO=${DB_ECHO:-False}
 
@@ -41,13 +37,9 @@ services:
       - API_RELOAD=${API_RELOAD:-False}
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:8501"]
 
-      # Logging
+      # Logging & Security
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-
-      # Security
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
-
-      # Feature Flags
       - ENABLE_METRICS=${ENABLE_METRICS:-True}
 
     volumes:
@@ -58,10 +50,30 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 15s
+
+  # Streamlit Frontend Service
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: healthlink-ui
+    # Overwrite startup command to run Streamlit frontend
+    command: ["streamlit", "run", "ui/streamlit_app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      # Communicate with the API container within the Docker network
+      - API_BASE_URL=http://api:8000/api/v1
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - healthlink-network
+    restart: unless-stopped
 
 networks:
   healthlink-network:
